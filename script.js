@@ -6,15 +6,40 @@ const $goButton = document.getElementById("go-button");
 const $progressBar = document.getElementById("progress-bar");
 const $progressNb = document.getElementById("progress-number");
 
-
+function checkResponseStatus(response) {
+    if (response.ok) return response;
+    throw new Error(`${response.status} (${response.statusText})`);
+  }
 
 function updateProgress(current, total, text) {
   $progressBar.value = current;
   $progressBar.max = total;
   $progressNb.textContent = `${current} / ${total}`;
-  if (text == null) $output.innerHTML += `${text}<br/>`;
+  if (text != null) $output.innerHTML += `${text}<br/>`;
 }
 
+
+function doProgressTimer(n) {
+    let current = 0;
+    const total = n;
+    
+    updateProgress(current,total,"Début!");
+
+    const interval = setInterval(() => {
+      current++;
+      updateProgress(current, total);
+      
+
+      if (current == (total/2)){
+        updateProgress(current,total,'Moitié');
+      }
+
+      if (current >= total) {
+        clearInterval(interval); // Arrête la progression une fois atteinte
+        updateProgress(total, total, 'Progression terminée');
+      }
+    }, 1000); // Toutes les secondes
+  }
 
 async function downloadAndCheck() {
   $output.innerHTML = "";
@@ -31,10 +56,7 @@ async function downloadAndCheck() {
 
 $goButton.addEventListener("click", downloadAndCheck);
 
-updateProgress(0, 10, "départ");
-updateProgress(1, 10);
-updateProgress(2, 10);
-updateProgress(3, 10);
-updateProgress(4, 10);
-updateProgress(5, 10, "moitié");
-updateProgress(10, 10, "fini !");
+
+doProgressTimer(10);
+
+
